@@ -18,7 +18,7 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout" stretch="6,2">
       <item>
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="pixmap_media">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
           <horstretch>0</horstretch>
@@ -45,7 +45,7 @@
       <item>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <widget class="QLabel" name="header">
+         <widget class="QLabel" name="baslik">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
             <horstretch>0</horstretch>
@@ -90,30 +90,53 @@ Demo Programı</string>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_fps">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+         <widget class="QLabel" name="saat">
+          <property name="font">
+           <font>
+            <pointsize>24</pointsize>
+           </font>
           </property>
           <property name="text">
-           <string>TextLabel</string>
+           <string>Saat:</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_tespit">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
+         <widget class="QLabel" name="tarih">
           <property name="text">
-           <string>TextLabel</string>
+           <string>Tarih:</string>
           </property>
          </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="fps">
+          <property name="text">
+           <string>Fps:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="log_basligi">
+          <property name="text">
+           <string>Sistem logları:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTextBrowser" name="textBrowser_log"/>
         </item>
        </layout>
       </item>
