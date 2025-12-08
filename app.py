@@ -1,8 +1,9 @@
 import sys
 import cv2
+import time
 from PyQt6.QtWidgets import QApplication, QMainWindow
 from PyQt6.QtGui import QImage, QPixmap
-from PyQt6.QtCore import QTimer
+from PyQt6.QtCore import QTimer, QDateTime
 from _main_ui import Ui_MainWindow
 
 
@@ -17,6 +18,11 @@ class MainWindow(QMainWindow):
         self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         
+        # FPS hesaplama için değişkenler
+        self.prev_frame_time = time.time()
+        self.new_frame_time = 0
+        self.last_fps_update_time = 0  # FPS güncelleme zamanlayıcısı
+        
         # Timer ile frame güncelle
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_frame)
@@ -27,6 +33,23 @@ class MainWindow(QMainWindow):
         ret, frame = self.camera.read()
         
         if ret:
+            # FPS Hesaplama
+            self.new_frame_time = time.time()
+            time_diff = self.new_frame_time - self.prev_frame_time
+            if time_diff > 0:
+                fps = 1 / time_diff
+                self.prev_frame_time = self.new_frame_time
+                
+                # FPS göstergesini her 0.5 saniyede bir güncelle
+                if self.new_frame_time - self.last_fps_update_time > 0.5:
+                    self.ui.fps.setText(f"FPS: {int(fps)}")
+                    self.last_fps_update_time = self.new_frame_time
+
+            # Tarih ve Saat Güncelleme
+            current_datetime = QDateTime.currentDateTime()
+            self.ui.saat.setText(current_datetime.toString('HH:mm:ss'))
+            self.ui.tarih.setText(current_datetime.toString('dd.MM.yyyy'))
+
             # BGR'den RGB'ye dönüştür
             rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             

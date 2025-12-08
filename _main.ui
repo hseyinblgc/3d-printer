@@ -43,7 +43,7 @@
        </widget>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout">
+       <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0,3,2,3,0,7">
         <item>
          <widget class="QLabel" name="baslik">
           <property name="sizePolicy">
@@ -52,11 +52,40 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="palette">
+           <palette>
+            <active>
+             <colorrole role="WindowText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>141</red>
+                <green>253</green>
+                <blue>244</blue>
+               </color>
+              </brush>
+             </colorrole>
+            </active>
+            <inactive>
+             <colorrole role="WindowText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>141</red>
+                <green>253</green>
+                <blue>244</blue>
+               </color>
+              </brush>
+             </colorrole>
+            </inactive>
+            <disabled/>
+           </palette>
+          </property>
           <property name="font">
            <font>
-            <family>Noto Emoji</family>
+            <family>Liberation Sans</family>
             <pointsize>22</pointsize>
-            <bold>false</bold>
+            <bold>true</bold>
+            <underline>false</underline>
+            <kerning>true</kerning>
            </font>
           </property>
           <property name="layoutDirection">
@@ -75,8 +104,8 @@
            <number>1</number>
           </property>
           <property name="text">
-           <string>Pixel Analitik 
-Demo Programı</string>
+           <string>Yabancı Cisim 
+Tespiti Demo</string>
           </property>
           <property name="textFormat">
            <enum>Qt::TextFormat::AutoText</enum>
@@ -90,28 +119,94 @@ Demo Programı</string>
          </widget>
         </item>
         <item>
+         <widget class="QLabel" name="fps">
+          <property name="palette">
+           <palette>
+            <active>
+             <colorrole role="WindowText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>44</red>
+                <green>253</green>
+                <blue>29</blue>
+               </color>
+              </brush>
+             </colorrole>
+            </active>
+            <inactive>
+             <colorrole role="WindowText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>44</red>
+                <green>253</green>
+                <blue>29</blue>
+               </color>
+              </brush>
+             </colorrole>
+            </inactive>
+            <disabled/>
+           </palette>
+          </property>
+          <property name="autoFillBackground">
+           <bool>true</bool>
+          </property>
+          <property name="text">
+           <string>Fps:</string>
+          </property>
+         </widget>
+        </item>
+        <item alignment="Qt::AlignmentFlag::AlignHCenter">
          <widget class="QLabel" name="saat">
           <property name="font">
            <font>
             <pointsize>24</pointsize>
+            <bold>true</bold>
            </font>
+          </property>
+          <property name="autoFillBackground">
+           <bool>false</bool>
           </property>
           <property name="text">
            <string>Saat:</string>
           </property>
          </widget>
         </item>
-        <item>
+        <item alignment="Qt::AlignmentFlag::AlignHCenter">
          <widget class="QLabel" name="tarih">
+          <property name="palette">
+           <palette>
+            <active>
+             <colorrole role="Base">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>47</red>
+                <green>45</green>
+                <blue>41</blue>
+               </color>
+              </brush>
+             </colorrole>
+            </active>
+            <inactive>
+             <colorrole role="Base">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>47</red>
+                <green>45</green>
+                <blue>41</blue>
+               </color>
+              </brush>
+             </colorrole>
+            </inactive>
+            <disabled/>
+           </palette>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+           </font>
+          </property>
           <property name="text">
            <string>Tarih:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="fps">
-          <property name="text">
-           <string>Fps:</string>
           </property>
          </widget>
         </item>
