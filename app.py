@@ -1,10 +1,35 @@
 import sys
 import cv2
 import time
+import os
 from PyQt6.QtWidgets import QApplication, QMainWindow
 from PyQt6.QtGui import QImage, QPixmap
-from PyQt6.QtCore import QTimer, QDateTime
+from PyQt6.QtCore import QTimer, QDateTime, QUrl
+from PyQt6.QtMultimedia import QSoundEffect
 from _main_ui import Ui_MainWindow
+
+# Ses efektini global değişkende tutuyoruz
+sound_effect = None
+
+def cleanup_sound():
+    """Ses çalma bittiğinde nesneyi hafızadan temizle"""
+    global sound_effect
+    if sound_effect and not sound_effect.isPlaying():
+        sound_effect = None
+
+def warnuser():
+    global sound_effect
+    # Dosya yolunu tam olarak belirtmek daha güvenlidir
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "resources/audio.wav")
+    
+    sound_effect = QSoundEffect()
+    sound_effect.setSource(QUrl.fromLocalFile(path))
+    sound_effect.setVolume(1.0)
+    
+    # Çalma durumu değiştiğinde (bittiğinde) temizlik fonksiyonunu tetikle
+    sound_effect.playingChanged.connect(cleanup_sound)
+    
+    sound_effect.play()
 
 
 class MainWindow(QMainWindow):
@@ -12,6 +37,9 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        
+        # Test etmek isterseniz warnuser'ı burada çağırabilirsiniz
+        # warnuser()
         
         # Kamera başlat
         self.camera = cv2.VideoCapture(0)
