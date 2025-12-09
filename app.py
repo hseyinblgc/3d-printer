@@ -7,6 +7,7 @@ from PyQt6.QtGui import QImage, QPixmap
 from PyQt6.QtCore import QTimer, QDateTime, QUrl
 from PyQt6.QtMultimedia import QSoundEffect
 from _main_ui import Ui_MainWindow
+from ai import AIEngine
 
 # Ses efektini global değişkende tutuyoruz
 sound_effect = None
@@ -37,6 +38,13 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+
+        # AI MOTORU
+        self.ai = AIEngine(
+            model_path="models/best.onnx",
+            conf_threshold=0.4,
+            frame_skip=2
+        )
         
         # Test etmek isterseniz warnuser'ı burada çağırabilirsiniz
         # warnuser()
@@ -59,15 +67,41 @@ class MainWindow(QMainWindow):
     def update_frame(self):
         """Kameradan frame al ve pixmap'e göster"""
         ret, frame = self.camera.read()
-        
+        if not ret:
+            return
+
         if ret:
+            results = self.ai.detect(frame)
+
+            if results["hand"] or results["spaghetti"]:
+                warnuser()
+
+            for box in results["boxes"]:
+                cls_id = box["class_id"]
+                x1, y1, x2, y2 = box["box"]
+
+                if cls_id == 0:
+                    label = "HAND"
+                    color = (0, 255, 0)
+                elif cls_id == 1:
+                    label = "SPAGHETTI"
+                    color = (0, 0, 255)
+                else:
+                    continue
+
+                cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+                cv2.putText(
+                    frame, label, (x1, y1 - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2
+                )
+
             # FPS Hesaplama
             self.new_frame_time = time.time()
             time_diff = self.new_frame_time - self.prev_frame_time
             if time_diff > 0:
                 fps = 1 / time_diff
                 self.prev_frame_time = self.new_frame_time
-                
+
                 # FPS göstergesini her 0.5 saniyede bir güncelle
                 if self.new_frame_time - self.last_fps_update_time > 0.5:
                     self.ui.fps.setText(f"FPS: {int(fps)}")
@@ -80,16 +114,17 @@ class MainWindow(QMainWindow):
 
             # BGR'den RGB'ye dönüştür
             rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            
+
             # OpenCV frame'i QImage'e dönüştür
             h, w, ch = rgb_frame.shape
             bytes_per_line = 3 * w
             qt_image = QImage(rgb_frame.data, w, h, bytes_per_line, QImage.Format.Format_RGB888)
-            
+
             # QPixmap'e dönüştür ve label'a ayarla
             pixmap = QPixmap.fromImage(qt_image)
             self.ui.pixmap_media.setPixmap(pixmap.scaledToWidth(640))
-    
+
+
     def closeEvent(self, event):
         """Pencere kapanırken kamerayı kapat"""
         self.timer.stop()
