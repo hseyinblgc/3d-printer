@@ -58,6 +58,12 @@ class MainWindow(QMainWindow):
         self.timer.timeout.connect(self.update_frame)
         self.timer.start(30)
     
+    def add_log(self, message):
+        """Log mesajını textBrowser_log'a ekle"""
+        timestamp = QDateTime.currentDateTime().toString('HH:mm:ss')
+        log_message = f"[{timestamp}] {message}"
+        self.ui.textBrowser_log.append(log_message)
+    
     def update_frame(self):
         """Kameradan frame al ve pixmap'e göster"""
         ret, frame = self.camera.read()
@@ -72,6 +78,16 @@ class MainWindow(QMainWindow):
         # Eğer önceki durumda algılanmamış ama şimdi algılandıysa, bir kez çal
         if not self.last_detection_state and current_detection:
             warnuser()
+            
+            # Tespit edilen nesneyi logla
+            detected_items = []
+            if results["hand"]:
+                detected_items.append("EL")
+            if results["spaghetti"]:
+                detected_items.append("SPAGHETTI")
+            
+            if detected_items:
+                self.add_log(f"⚠️ TESPİT EDİLDİ: {', '.join(detected_items)}")
         
         # Son durumu güncelle
         self.last_detection_state = current_detection
