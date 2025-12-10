@@ -3,7 +3,7 @@ from ultralytics import YOLO
 class AIEngine:
     def __init__(
         self,
-        model_path="models/best.onnx",
+        model_path="resources/models/best.onnx",
         conf_threshold=0.4,
         frame_skip=10,     # Her 2 frame'de 1 tespit (0 = her frame)
         imgsz=640

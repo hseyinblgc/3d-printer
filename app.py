@@ -11,26 +11,24 @@ from ai import AIEngine
 
 # Ses efektini global değişkende tutuyoruz
 sound_effect = None
-
-def cleanup_sound():
-    """Ses çalma bittiğinde nesneyi hafızadan temizle"""
-    global sound_effect
-    if sound_effect and not sound_effect.isPlaying():
-        sound_effect = None
+last_detection_state = None  # Son algılanan nesne durumu
 
 def warnuser():
+    """Ses çal"""
     global sound_effect
-    # Dosya yolunu tam olarak belirtmek daha güvenlidir
-    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "resources/audio.wav")
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "resources/media/audio.wav")
     
-    sound_effect = QSoundEffect()
-    sound_effect.setSource(QUrl.fromLocalFile(path))
-    sound_effect.setVolume(1.0)
+    if not os.path.exists(path):
+        print(f"Ses dosyası bulunamadı: {path}")
+        return
     
-    # Çalma durumu değiştiğinde (bittiğinde) temizlik fonksiyonunu tetikle
-    sound_effect.playingChanged.connect(cleanup_sound)
-    
-    sound_effect.play()
+    try:
+        sound_effect = QSoundEffect()
+        sound_effect.setSource(QUrl.fromLocalFile(path))
+        sound_effect.setVolume(1.0)
+        sound_effect.play()
+    except Exception as e:
+        print(f"Ses çalma hatası: {e}")
 
 
 class MainWindow(QMainWindow):
@@ -40,14 +38,10 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
 
         # AI MOTORU
-        self.ai = AIEngine(
-            model_path="models/best.onnx",
-            conf_threshold=0.4,
-            frame_skip=2
-        )
+        self.ai = AIEngine()
         
-        # Test etmek isterseniz warnuser'ı burada çağırabilirsiniz
-        # warnuser()
+        # Son algılanan nesne durumu (tespit edilmiş mi?)
+        self.last_detection_state = None
         
         # Kamera başlat
         self.camera = cv2.VideoCapture(0)
@@ -62,7 +56,7 @@ class MainWindow(QMainWindow):
         # Timer ile frame güncelle
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_frame)
-        self.timer.start(30)  # 30ms = ~33 FPS
+        self.timer.start(30)
     
     def update_frame(self):
         """Kameradan frame al ve pixmap'e göster"""
@@ -70,60 +64,64 @@ class MainWindow(QMainWindow):
         if not ret:
             return
 
-        if ret:
-            results = self.ai.detect(frame)
+        results = self.ai.detect(frame)
+        
+        # Mevcut algılama durumu
+        current_detection = results["hand"] or results["spaghetti"]
+        
+        # Eğer önceki durumda algılanmamış ama şimdi algılandıysa, bir kez çal
+        if not self.last_detection_state and current_detection:
+            warnuser()
+        
+        # Son durumu güncelle
+        self.last_detection_state = current_detection
 
-            if results["hand"] or results["spaghetti"]:
-                warnuser()
+        for box in results["boxes"]:
+            cls_id = box["class_id"]
+            x1, y1, x2, y2 = box["box"]
 
-            for box in results["boxes"]:
-                cls_id = box["class_id"]
-                x1, y1, x2, y2 = box["box"]
+            if cls_id == 0:
+                label = "HAND"
+                color = (0, 255, 0)
+            elif cls_id == 1:
+                label = "SPAGHETTI"
+                color = (0, 0, 255)
+            else:
+                continue
 
-                if cls_id == 0:
-                    label = "HAND"
-                    color = (0, 255, 0)
-                elif cls_id == 1:
-                    label = "SPAGHETTI"
-                    color = (0, 0, 255)
-                else:
-                    continue
+            cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+            cv2.putText(
+                frame, label, (x1, y1 - 10),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2
+            )
 
-                cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
-                cv2.putText(
-                    frame, label, (x1, y1 - 10),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2
-                )
+        # FPS Hesaplama
+        self.new_frame_time = time.time()
+        time_diff = self.new_frame_time - self.prev_frame_time
+        if time_diff > 0:
+            fps = 1 / time_diff
+            self.prev_frame_time = self.new_frame_time
 
-            # FPS Hesaplama
-            self.new_frame_time = time.time()
-            time_diff = self.new_frame_time - self.prev_frame_time
-            if time_diff > 0:
-                fps = 1 / time_diff
-                self.prev_frame_time = self.new_frame_time
+            if self.new_frame_time - self.last_fps_update_time > 0.5:
+                self.ui.fps.setText(f"FPS: {int(fps)}")
+                self.last_fps_update_time = self.new_frame_time
 
-                # FPS göstergesini her 0.5 saniyede bir güncelle
-                if self.new_frame_time - self.last_fps_update_time > 0.5:
-                    self.ui.fps.setText(f"FPS: {int(fps)}")
-                    self.last_fps_update_time = self.new_frame_time
+        # Tarih ve Saat Güncelleme
+        current_datetime = QDateTime.currentDateTime()
+        self.ui.saat.setText(current_datetime.toString('HH:mm:ss'))
+        self.ui.tarih.setText(current_datetime.toString('dd.MM.yyyy'))
 
-            # Tarih ve Saat Güncelleme
-            current_datetime = QDateTime.currentDateTime()
-            self.ui.saat.setText(current_datetime.toString('HH:mm:ss'))
-            self.ui.tarih.setText(current_datetime.toString('dd.MM.yyyy'))
+        # BGR'den RGB'ye dönüştür
+        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-            # BGR'den RGB'ye dönüştür
-            rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        # OpenCV frame'i QImage'e dönüştür
+        h, w, ch = rgb_frame.shape
+        bytes_per_line = 3 * w
+        qt_image = QImage(rgb_frame.data, w, h, bytes_per_line, QImage.Format.Format_RGB888)
 
-            # OpenCV frame'i QImage'e dönüştür
-            h, w, ch = rgb_frame.shape
-            bytes_per_line = 3 * w
-            qt_image = QImage(rgb_frame.data, w, h, bytes_per_line, QImage.Format.Format_RGB888)
-
-            # QPixmap'e dönüştür ve label'a ayarla
-            pixmap = QPixmap.fromImage(qt_image)
-            self.ui.pixmap_media.setPixmap(pixmap.scaledToWidth(640))
-
+        # QPixmap'e dönüştür ve label'a ayarla
+        pixmap = QPixmap.fromImage(qt_image)
+        self.ui.pixmap_media.setPixmap(pixmap.scaledToWidth(640))
 
     def closeEvent(self, event):
         """Pencere kapanırken kamerayı kapat"""
