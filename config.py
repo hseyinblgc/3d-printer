@@ -1,0 +1,41 @@
+#  ALARM BÖLGESİ
+ALARM_REGION = {
+    "x": 364,
+    "y": 385,
+    "w": 957,
+    "h": 586
+}
+
+ALARM_REGION_ENABLED = True
+ROI_IOU_THRESHOLD = 0.5  # %50 içerdeyse alarm
+
+
+#  AI AYARLARI
+MODEL_PATH = "resources/models/best.onnx"
+CONF_THRESHOLD = 0.4
+FRAME_SKIP = 2
+IMG_SIZE = 640
+
+# Sınıflar
+CLASS_HAND = 0
+CLASS_SPAGHETTI = 1
+CLASS_BACKGROUND = 2
+
+# Alarm tetikleyecek sınıflar
+ALARM_CLASSES = [CLASS_HAND, CLASS_SPAGHETTI]
+
+#  ALARM AYARLARI
+ALARM_SOUND_PATH = "resources/audio.wav"
+ALARM_VOLUME = 1.0
+ALARM_COOLDOWN = 1.0  # saniye
+
+
+#  KAMERA AYARLARI
+CAMERA_SOURCE = 0
+CAMERA_WIDTH = 1920
+CAMERA_HEIGHT = 1080
+CAMERA_TARGET_FPS = 30
+
+
+#  UI AYARLARI
+DISPLAY_WIDTH = 640
