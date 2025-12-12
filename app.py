@@ -29,7 +29,7 @@ CLASS_BACKGROUND = 2
 
 ALARM_CLASSES = [CLASS_HAND, CLASS_SPAGHETTI]
 
-ALARM_SOUND_PATH = "resources/audio.wav"
+ALARM_SOUND_PATH = "resources/media/audio.wav"
 ALARM_VOLUME = 1.0
 ALARM_COOLDOWN = 1.0
 
@@ -129,7 +129,6 @@ last_alarm_time = 0
 
 
 def warnuser():
-    print("allarm")
     global sound_effect, last_alarm_time
 
     now = time.time()
